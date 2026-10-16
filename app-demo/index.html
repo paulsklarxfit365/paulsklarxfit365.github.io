@@ -167,7 +167,7 @@ svg{display:block}
       <li><span class="n">3</span><div><b>Why framing matters</b><span>Everything that matters in the shot is inside the 4:5 box. The bands hold floor and wall only, so the app's controls can live there.</span></div></li>
     </ol>
     <label class="sw"><input type="checkbox" id="gsw"> Show the 4:5 safe area</label>
-    <p class="fine"><b>About this demo:</b> it uses an existing clip from the library, which is landscape, so it sits in the middle of the frame with room above and below. The new clips are shot vertical and fill the 4:5 box edge to edge.</p>
+    <p class="fine"><b>About this demo:</b> the clip is a real 1080 × 1920 export from the new library, straight from Vimeo. Nothing is cropped or re-cut per screen; the app does all of it from this one file.</p>
   </aside>
 
   <div class="phone">
@@ -238,10 +238,10 @@ svg{display:block}
 (function(){
   // ---- the one thing to change per clip ----
   var CLIP = {
-    id: 787384819,                 // Vimeo video id
-    hash: "",                      // "h" value for unlisted links, else ""
-    orientation: "landscape",      // "vertical" for the new 9:16 clips
-    poster: "https://i.vimeocdn.com/video/1583294752-81ea1c257a1603a68a7d417e168c63f28c169c22413b9c70c854cdb9d64cfd17-d_1280?region=us"
+    id: 1234920454,                // Vimeo video id (156_Push Up To Barrel Rotation, 1080×1920)
+    hash: "fbba5d2798",            // "h" value for unlisted links, else ""
+    orientation: "vertical",       // "landscape" for the old 16:9 clips
+    poster: "https://i.vimeocdn.com/video/2211032927-64d6c1fc8db3e3af41621bd2643e8b47d80125d296768c43620da6704c57159a-d_1280?region=us"
   };
 
   var root=document.getElementById('root');
