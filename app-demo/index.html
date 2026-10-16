@@ -68,7 +68,9 @@ svg{display:block}
 .nav h2{margin:0;text-align:center;font:800 17px/1 var(--display);font-stretch:112%;letter-spacing:.02em}
 .nav button{width:44px;height:36px;display:grid;place-items:center;border-radius:10px;color:var(--white)}
 .nav button:active{background:var(--black-3)}
-.scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:18px 16px calc(24px + env(safe-area-inset-bottom,0px));display:grid;gap:18px;align-content:start;scrollbar-width:none}
+.scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:18px 16px calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:18px;scrollbar-width:none}
+.scroll > *{flex:none}
+.card .win{height:auto}
 .scroll::-webkit-scrollbar{display:none}
 
 /* ---------- timer ---------- */
