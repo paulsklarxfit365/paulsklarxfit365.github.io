@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>PSXF Exercise Player · 4:5 preview → 9:16 full screen</title>
+<meta name="theme-color" content="#0A0A0A">
+<link rel="icon" href="../favicon.svg">
+<style>
+/* PSXF app-screen mockup. One Vimeo file. The workout screen shows the center 4:5 of a 9:16 stage; tapping opens the full 9:16 with the app's controls over the top and bottom bands. Dark, brand red, Archivo display + Inter body (fonts shipped in ../assets/fonts). */
+@font-face { font-family:"Archivo"; font-style:normal; font-display:swap; font-weight:100 900; font-stretch:62% 125%; src:url(../assets/fonts/archivo-latin-wdth-normal.woff2) format("woff2"); }
+@font-face { font-family:"Archivo"; font-style:italic; font-display:swap; font-weight:100 900; font-stretch:62% 125%; src:url(../assets/fonts/archivo-latin-wdth-italic.woff2) format("woff2"); }
+@font-face { font-family:"Inter"; font-style:normal; font-display:swap; font-weight:100 900; src:url(../assets/fonts/inter-latin-wght-normal.woff2) format("woff2"); }
+
+:root{
+  --black:#0A0A0A; --black-2:#141416; --black-3:#1E1E21; --black-4:#27272B;
+  --white:#fff; --fg-2:rgba(255,255,255,.72); --mute:#9EA1A7; --line:rgba(255,255,255,.12);
+  --red:#E3222B; --red-fill:#D11A22; --red-text:#FF4048;
+  --amber:#FFD200; --cyan:#3FD6F2;
+  --display:"Archivo","Arial Black",Arial,sans-serif; --body:"Inter",-apple-system,"Segoe UI",Arial,sans-serif;
+  --ease:cubic-bezier(.22,1,.36,1);
+  --band:14.84%; /* 285 / 1920 */
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--black);color:var(--white);font:400 15px/1.5 var(--body);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+:focus-visible{outline:3px solid var(--red-text);outline-offset:3px}
+svg{display:block}
+
+/* ---------- page shell (desktop shows a phone; small screens become the phone) ---------- */
+.shell{min-height:100%;display:grid;grid-template-columns:1fr;align-items:center;justify-items:center}
+.phone{position:relative;width:100%;height:100dvh;background:var(--black);overflow:hidden}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden;background:var(--black)}
+.side{display:none}
+@media (min-width:860px){
+  body{background:radial-gradient(900px 600px at 70% 20%,#1b1113 0%,var(--black) 60%)}
+  .shell{grid-template-columns:minmax(0,420px) 390px;gap:72px;padding:48px 24px;min-height:100dvh;max-width:1080px;margin:0 auto}
+  .phone{width:390px;height:844px;border-radius:54px;border:10px solid #1a1a1d;box-shadow:0 0 0 2px #2c2c30,0 50px 120px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.04)}
+  .phone::before{content:"";position:absolute;z-index:40;top:12px;left:50%;transform:translateX(-50%);width:124px;height:36px;border-radius:20px;background:#000}
+  .screen{border-radius:44px}
+  .side{display:grid;gap:28px;order:-1;align-content:center}
+}
+
+/* ---------- side explainer (desktop) ---------- */
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font:700 12px/1.2 var(--display);font-stretch:118%;letter-spacing:.22em;text-transform:uppercase;color:var(--mute)}
+.eyebrow::before{content:"";width:20px;height:7px;background:var(--red);transform:skewX(-24deg)}
+.side h1{margin:10px 0 0;font:900 italic clamp(34px,4vw,52px)/.98 var(--display);font-stretch:125%;text-transform:uppercase;letter-spacing:-.01em;text-wrap:balance}
+.side h1 b{color:var(--red);font-weight:900}
+.side p{margin:0;max-width:52ch;color:var(--fg-2);font-size:16px;line-height:1.6}
+.steps{display:grid;gap:14px;margin:0;padding:0;list-style:none;max-width:52ch}
+.steps li{display:grid;grid-template-columns:34px 1fr;gap:14px;align-items:start}
+.steps .n{font:800 15px/34px var(--display);font-stretch:112%;text-align:center;height:34px;border-radius:9px;background:var(--black-3);color:var(--white)}
+.steps b{display:block;font:800 15px/1.3 var(--display);font-stretch:112%;letter-spacing:.01em}
+.steps span{color:var(--mute);font-size:14px;line-height:1.5}
+.sw{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--fg-2);user-select:none}
+.sw input{appearance:none;width:42px;height:24px;border-radius:999px;background:var(--black-4);position:relative;cursor:pointer;transition:background .2s;margin:0}
+.sw input::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--white);transition:transform .2s var(--ease)}
+.sw input:checked{background:var(--amber)} .sw input:checked::after{transform:translateX(18px)}
+.fine{font-size:13px;color:var(--mute);max-width:52ch;border-left:2px solid var(--line);padding-left:14px}
+.fine b{color:var(--fg-2);font-weight:600}
+
+/* ---------- app: status + nav ---------- */
+.status{height:max(44px,env(safe-area-inset-top,0px) + 12px);flex:none}
+@media (min-width:860px){.status{height:54px}}
+.nav{flex:none;display:grid;grid-template-columns:44px 1fr 44px;align-items:center;padding:0 10px 10px;border-bottom:1px solid var(--line)}
+.nav h2{margin:0;text-align:center;font:800 17px/1 var(--display);font-stretch:112%;letter-spacing:.02em}
+.nav button{width:44px;height:36px;display:grid;place-items:center;border-radius:10px;color:var(--white)}
+.nav button:active{background:var(--black-3)}
+.scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:18px 16px calc(24px + env(safe-area-inset-bottom,0px));display:grid;gap:18px;align-content:start;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+
+/* ---------- timer ---------- */
+.timer{display:grid;justify-items:center;gap:10px;padding-top:4px}
+.ring{position:relative;width:148px;height:148px}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .tr{fill:none;stroke:var(--black-3);stroke-width:9}
+.ring .pr{fill:none;stroke:var(--red);stroke-width:9;stroke-linecap:round;stroke-dasharray:424.1;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear}
+.ring .t{position:absolute;inset:0;display:grid;place-items:center;font:800 40px/1 var(--display);font-stretch:108%;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.ring .t small{display:block;margin-top:4px;text-align:center;font:600 10px/1 var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--mute)}
+.hint{color:var(--mute);font-size:13px}
+.cta{width:100%;height:54px;border-radius:14px;background:var(--red-fill);color:var(--white);font:800 15px/1 var(--display);font-stretch:112%;letter-spacing:.16em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .15s var(--ease),background .2s}
+.cta:active{transform:scale(.985)} .cta.ghost{background:var(--black-3);color:var(--white)}
+.cta[disabled]{background:var(--black-3);color:var(--mute);cursor:default}
+
+/* ---------- exercise card with 4:5 window ---------- */
+.card{border-radius:20px;overflow:hidden;background:var(--black-2);border:1px solid var(--line)}
+.win{position:relative;aspect-ratio:4/5;overflow:hidden;background:#000;cursor:pointer}
+/* the 9:16 stage, centered, cropped by the 4:5 window */
+.stage{position:absolute;left:0;width:100%;aspect-ratio:9/16;top:50%;transform:translateY(-50%);background:#000;overflow:hidden}
+.stage.vertical iframe{position:absolute;inset:0;width:100%;height:100%}
+.stage.landscape iframe{position:absolute;left:0;width:100%;aspect-ratio:16/9;top:50%;transform:translateY(-50%)}
+.stage iframe{border:0;pointer-events:none}
+.stage .poster{position:absolute;inset:0;background:#000 center/cover no-repeat;transition:opacity .5s}
+.stage.vertical .poster{background-size:cover}
+.stage.landscape .poster{background-size:contain}
+.stage.live .poster{opacity:0}
+.win .tap{position:absolute;inset:0;z-index:3}
+.win .grad{position:absolute;inset:auto 0 0;height:46%;background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.78));pointer-events:none;z-index:2}
+.win .name{position:absolute;left:16px;right:60px;bottom:14px;z-index:3;pointer-events:none}
+.win .name b{display:block;font:900 italic 22px/1.02 var(--display);font-stretch:118%;text-transform:uppercase;letter-spacing:-.005em;text-wrap:balance}
+.win .name span{display:block;margin-top:6px;font:600 11px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--fg-2)}
+.win .expand{position:absolute;right:12px;bottom:12px;z-index:3;width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.14);backdrop-filter:blur(10px);display:grid;place-items:center;pointer-events:none}
+.win .chip{position:absolute;left:12px;top:12px;z-index:3;font:700 11px/1 var(--display);font-stretch:112%;letter-spacing:.1em;padding:7px 9px;border-radius:8px;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);display:flex;align-items:center;gap:6px;pointer-events:none}
+.win .chip i{width:6px;height:6px;border-radius:50%;background:var(--red-text)}
+.meta{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px 14px}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tags span{font:600 11px/1 var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--fg-2);padding:6px 9px;border-radius:999px;border:1px solid var(--line)}
+.meta b{font:800 14px/1 var(--display);font-stretch:112%;white-space:nowrap;font-variant-numeric:tabular-nums}
+.upnext{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;background:var(--black-2);border:1px solid var(--line);color:var(--mute);font-size:13px}
+.upnext i{width:44px;height:55px;border-radius:9px;background:var(--black-3);flex:none}
+.upnext b{display:block;color:var(--white);font:800 14px/1.2 var(--display);font-stretch:112%}
+
+/* ---------- full-screen 9:16 ---------- */
+.full{position:absolute;inset:0;z-index:30;background:#000;display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .3s var(--ease),visibility 0s .3s}
+.full.open{opacity:1;visibility:visible;transition:opacity .3s var(--ease)}
+.full .fit{position:absolute;inset:0;background:#000;overflow:hidden}
+/* the 9:16 stage is centered on the screen; the app's controls hug the screen edges */
+.full .stage,.full .guide{position:absolute;left:0;width:100%;aspect-ratio:9/16;top:50%;transform:translateY(-50%)}
+.ui{position:absolute;left:0;right:0;z-index:5;pointer-events:none}
+.ui > *{pointer-events:auto}
+.ui.top{top:0;height:var(--band);background:linear-gradient(rgba(0,0,0,.8),rgba(0,0,0,0));padding:max(14px,env(safe-area-inset-top,0px)) 14px 0;display:grid;grid-template-columns:40px 1fr 40px;align-items:center}
+@media (min-width:860px){.ui.top{padding-top:46px}}
+.ui.top button{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.12);backdrop-filter:blur(10px);display:grid;place-items:center}
+.ui.top .ttl{text-align:center;font:800 15px/1.15 var(--display);font-stretch:112%;letter-spacing:.02em;text-wrap:balance;padding:0 6px}
+.ui.top .ttl small{display:block;margin-top:3px;font:600 10px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--fg-2)}
+.ui.bot{bottom:0;height:var(--band);background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.88) 50%);padding:0 16px calc(14px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:1fr auto;align-items:end;gap:12px}
+.ui.bot .set small{display:block;font:600 10px/1 var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--mute);margin-bottom:5px}
+.ui.bot .set b{display:block;font:900 26px/1 var(--display);font-stretch:112%;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.ui.bot .done{height:46px;padding:0 22px;border-radius:999px;background:var(--red-fill);color:var(--white);font:800 13px/1 var(--display);font-stretch:112%;letter-spacing:.16em;text-transform:uppercase}
+
+/* ---------- safe-area guide (toggle) ---------- */
+.guide{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:0;transition:opacity .25s}
+.guides .guide{opacity:1}
+.guide .band{position:absolute;left:0;right:0;background:rgba(255,210,0,.10);border:0 dashed rgba(255,210,0,.9)}
+.guide .band.t{top:0;height:var(--band);border-bottom-width:2px}
+.guide .band.b{bottom:0;height:var(--band);border-top-width:2px}
+.guide .lab{position:absolute;left:10px;font:700 10px/1 var(--display);font-stretch:112%;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);background:rgba(0,0,0,.6);padding:5px 7px;border-radius:6px}
+.guide .lab.t{top:calc(var(--band) + 8px)} .guide .lab.b{bottom:calc(var(--band) + 8px)}
+.guide .lab.bt{top:8px;color:#fff;opacity:.85} .guide .lab.bb{bottom:8px;color:#fff;opacity:.85}
+.win .guide .band{display:none} /* inside the 4:5 window the bands are already cropped away */
+.win .guide .lab.bt,.win .guide .lab.bb{display:none}
+.win .guide::after{content:"";position:absolute;inset:0;border:2px dashed rgba(255,210,0,.9)}
+.win .guide .lab.t{top:8px;left:auto;right:10px}
+.win .guide .lab.b{display:none}
+
+/* mobile-only guide toggle in the nav (desktop uses the side switch) */
+.nav .gbtn{font:700 10px/1 var(--display);letter-spacing:.1em;color:var(--mute);width:44px}
+.guides .nav .gbtn{color:var(--amber)}
+@media (min-width:860px){.nav .gbtn{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="shell" id="root">
+
+  <aside class="side">
+    <div>
+      <span class="eyebrow">PaulSklarXFit · exercise library</span>
+      <h1>One file.<br>Two <b>views.</b></h1>
+    </div>
+    <p>Every exercise is delivered as a single vertical 9:16 video. The workout screen shows the center 4:5 of it. Tap the video and the app opens the whole 9:16, with its own controls sitting in the top and bottom bands.</p>
+    <ol class="steps">
+      <li><span class="n">1</span><div><b>Workout screen</b><span>The clip plays muted on a loop inside a 4:5 card. The top and bottom 285 px of the file are simply cropped away.</span></div></li>
+      <li><span class="n">2</span><div><b>Tap to go full screen</b><span>Same file, now all 1080 × 1920 of it. Exercise name on top, set and timer controls at the bottom.</span></div></li>
+      <li><span class="n">3</span><div><b>Why framing matters</b><span>Everything that matters in the shot is inside the 4:5 box. The bands hold floor and wall only, so the app's controls can live there.</span></div></li>
+    </ol>
+    <label class="sw"><input type="checkbox" id="gsw"> Show the 4:5 safe area</label>
+    <p class="fine"><b>About this demo:</b> it uses an existing clip from the library, which is landscape, so it sits in the middle of the frame with room above and below. The new clips are shot vertical and fill the 4:5 box edge to edge.</p>
+  </aside>
+
+  <div class="phone">
+    <div class="screen">
+      <div class="status"></div>
+      <div class="nav">
+        <button type="button" aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <h2>Workout 9</h2>
+        <button type="button" class="gbtn" id="gbtn" aria-pressed="false" title="Show 4:5 safe area">4:5</button>
+      </div>
+
+      <div class="scroll">
+        <div class="timer">
+          <div class="ring">
+            <svg viewBox="0 0 148 148"><circle class="tr" cx="74" cy="74" r="67.5"/><circle class="pr" id="pr" cx="74" cy="74" r="67.5"/></svg>
+            <div class="t"><div><span id="tt">30</span><small>seconds</small></div></div>
+          </div>
+          <p class="hint" id="hint">Go when you’re ready</p>
+        </div>
+        <button type="button" class="cta" id="start"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"/></svg><span>Start 30s</span></button>
+
+        <div class="card">
+          <div class="win" id="win">
+            <div class="stage landscape" id="pv">
+              <div class="poster" id="pvPoster"></div>
+            </div>
+            <div class="guide"><span class="lab t">4:5 · what the workout screen shows</span></div>
+            <div class="grad"></div>
+            <div class="chip"><i></i>LOOP</div>
+            <div class="name"><b id="exName">Push Up to Barrel Rotation</b><span>Tap for full screen</span></div>
+            <div class="expand"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H3v6M15 3h6v6M9 21H3v-6M15 21h6v-6"/></svg></div>
+            <button type="button" class="tap" id="open" aria-label="Open full screen"></button>
+          </div>
+          <div class="meta"><div class="tags"><span>Core</span><span>Shoulders</span><span>Chest</span></div><b>3 × 30s</b></div>
+        </div>
+
+        <button type="button" class="cta ghost" disabled>Next exercise</button>
+        <div class="upnext"><i></i><div><b>Banded Dynamic Shoulder Abduction</b>Up next · 3 × 12</div></div>
+      </div>
+
+      <!-- full screen 9:16 -->
+      <div class="full" id="full" aria-hidden="true">
+        <div class="fit">
+          <div class="stage landscape" id="fs"><div class="poster" id="fsPoster"></div></div>
+          <div class="guide">
+            <div class="band t"></div><div class="band b"></div>
+            <span class="lab bt">285 px band · app controls</span>
+            <span class="lab t">4:5 safe area · all movement + text</span>
+            <span class="lab bb">285 px band · app controls</span>
+          </div>
+          <div class="ui top">
+            <button type="button" id="close" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+            <div class="ttl">Push Up to Barrel Rotation<small>Workout 9 · 4 of 8</small></div>
+            <button type="button" aria-label="Info"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button>
+          </div>
+          <div class="ui bot">
+            <div class="set"><small>Set 1 of 3</small><b id="ft">0:30</b></div>
+            <button type="button" class="done" id="done">Done</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://player.vimeo.com/api/player.js"></script>
+<script>
+(function(){
+  // ---- the one thing to change per clip ----
+  var CLIP = {
+    id: 787384819,                 // Vimeo video id
+    hash: "",                      // "h" value for unlisted links, else ""
+    orientation: "landscape",      // "vertical" for the new 9:16 clips
+    poster: "https://i.vimeocdn.com/video/1583294752-81ea1c257a1603a68a7d417e168c63f28c169c22413b9c70c854cdb9d64cfd17-d_1280?region=us"
+  };
+
+  var root=document.getElementById('root');
+  var pv=document.getElementById('pv'), fs=document.getElementById('fs');
+  [pv,fs].forEach(function(s){ s.classList.remove('landscape','vertical'); s.classList.add(CLIP.orientation); });
+  document.getElementById('pvPoster').style.backgroundImage='url("'+CLIP.poster+'")';
+  document.getElementById('fsPoster').style.backgroundImage='url("'+CLIP.poster+'")';
+
+  function src(bg){
+    var q='autoplay=1&loop=1&muted=1&autopause=0&playsinline=1&dnt=1&title=0&byline=0&portrait=0';
+    q+= bg ? '&background=1&controls=0' : '&controls=0';
+    if(CLIP.hash) q+='&h='+CLIP.hash;
+    return 'https://player.vimeo.com/video/'+CLIP.id+'?'+q;
+  }
+  function mount(stage,bg){
+    var f=document.createElement('iframe');
+    f.src=src(bg); f.allow='autoplay; fullscreen; picture-in-picture'; f.title='Exercise video';
+    f.setAttribute('allowfullscreen',''); stage.appendChild(f);
+    var p=null;
+    try{ p=new Vimeo.Player(f); p.on('play',function(){stage.classList.add('live');}); p.setVolume(0).catch(function(){}); }catch(e){}
+    return p;
+  }
+  var pvPlayer=mount(pv,true);
+  var fsPlayer=null;
+
+  // ---- full screen ----
+  var full=document.getElementById('full');
+  function open(){
+    full.classList.add('open'); full.setAttribute('aria-hidden','false'); root.classList.add('fullopen');
+    if(!fsPlayer){ fsPlayer=mount(fs,false); }
+    else { fsPlayer.play().catch(function(){}); }
+    if(pvPlayer){ pvPlayer.getCurrentTime().then(function(t){ if(fsPlayer) fsPlayer.setCurrentTime(t).catch(function(){}); }).catch(function(){}); }
+    document.getElementById('close').focus();
+  }
+  function close(){
+    full.classList.remove('open'); full.setAttribute('aria-hidden','true'); root.classList.remove('fullopen');
+    if(fsPlayer){ fsPlayer.pause().catch(function(){}); }
+    document.getElementById('open').focus();
+  }
+  document.getElementById('open').addEventListener('click',open);
+  document.getElementById('close').addEventListener('click',close);
+  document.getElementById('done').addEventListener('click',close);
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape' && full.classList.contains('open')) close(); });
+
+  // ---- safe-area guide ----
+  var gsw=document.getElementById('gsw'), gbtn=document.getElementById('gbtn');
+  function setGuides(on){ root.classList.toggle('guides',on); gsw.checked=on; gbtn.setAttribute('aria-pressed',String(on)); }
+  gsw.addEventListener('change',function(){ setGuides(gsw.checked); });
+  gbtn.addEventListener('click',function(){ setGuides(!root.classList.contains('guides')); });
+
+  // ---- 30 s timer ----
+  var total=30,left=total,tick=null,running=false;
+  var pr=document.getElementById('pr'),tt=document.getElementById('tt'),ft=document.getElementById('ft'),hint=document.getElementById('hint'),start=document.getElementById('start');
+  var C=424.1;
+  function paint(){ pr.style.strokeDashoffset=String(C*(1-left/total)); tt.textContent=left; ft.textContent='0:'+String(left).padStart(2,'0'); }
+  function stop(){ clearInterval(tick); tick=null; running=false; }
+  start.addEventListener('click',function(){
+    if(running){ stop(); start.querySelector('span').textContent='Resume'; hint.textContent='Paused'; return; }
+    if(left===0){ left=total; }
+    running=true; start.querySelector('span').textContent='Pause'; hint.textContent='Go';
+    tick=setInterval(function(){
+      left--; paint();
+      if(left<=0){ stop(); hint.textContent='Set done. Rest 60 s'; start.querySelector('span').textContent='Start 30s'; }
+    },1000);
+  });
+  paint();
+})();
+</script>
+</body>
+</html>
