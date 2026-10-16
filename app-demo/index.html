@@ -101,8 +101,8 @@ svg{display:block}
 .win .tap{position:absolute;inset:0;z-index:3}
 .win .grad{position:absolute;inset:auto 0 0;height:46%;background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.78));pointer-events:none;z-index:2}
 .win .name{position:absolute;left:16px;right:60px;bottom:14px;z-index:3;pointer-events:none}
-.win .name b{display:block;font:900 italic 22px/1.02 var(--display);font-stretch:118%;text-transform:uppercase;letter-spacing:-.005em;text-wrap:balance}
-.win .name span{display:block;margin-top:6px;font:600 11px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--fg-2)}
+.win .name b{display:block;font:800 14px/1.15 var(--display);font-stretch:112%;text-transform:uppercase;letter-spacing:.04em;text-wrap:balance}
+.win .name span{display:block;margin-top:5px;font:600 10px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--fg-2)}
 .win .expand{position:absolute;right:12px;bottom:12px;z-index:3;width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.14);backdrop-filter:blur(10px);display:grid;place-items:center;pointer-events:none}
 .win .chip{position:absolute;left:12px;top:12px;z-index:3;font:700 11px/1 var(--display);font-stretch:112%;letter-spacing:.1em;padding:7px 9px;border-radius:8px;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);display:flex;align-items:center;gap:6px;pointer-events:none}
 .win .chip i{width:6px;height:6px;border-radius:50%;background:var(--red-text)}
@@ -146,6 +146,56 @@ svg{display:block}
 .win .guide::after{content:"";position:absolute;inset:0;border:2px dashed rgba(255,210,0,.9)}
 .win .guide .lab.t{top:8px;left:auto;right:10px}
 .win .guide .lab.b{display:none}
+
+/* minimal full-screen chrome: one small close button, tap anywhere else to close */
+.xbtn{position:absolute;z-index:6;top:max(14px,env(safe-area-inset-top,0px));left:14px;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);display:grid;place-items:center;opacity:.85}
+@media (min-width:860px){.xbtn{top:50px}}
+.tapclose{position:absolute;inset:0;z-index:4}
+
+/* ---------- example 2: UI concerns ---------- */
+.concern{max-width:1080px;margin:0 auto;padding:40px 16px calc(56px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
+@media (min-width:860px){.concern{padding:72px 24px 96px}}
+.c-head{display:grid;gap:12px;max-width:62ch;margin-bottom:28px}
+.c-head h2{margin:0;font:900 italic clamp(28px,3.6vw,44px)/1 var(--display);font-stretch:125%;text-transform:uppercase;letter-spacing:-.01em;text-wrap:balance}
+.c-head p{margin:0;color:var(--fg-2);font-size:16px;line-height:1.6}
+.c-head p b{color:var(--white);font-weight:600}
+.c-row{display:grid;gap:28px;align-items:start;justify-items:center}
+@media (min-width:860px){.c-row{grid-template-columns:390px minmax(0,1fr);gap:56px;justify-items:start;align-items:center}}
+.phone.two{width:min(390px,100%);height:auto;aspect-ratio:390/844;border-radius:54px;border:10px solid #1a1a1d;box-shadow:0 0 0 2px #2c2c30,0 40px 100px rgba(0,0,0,.6)}
+.phone.two::before{content:"";position:absolute;z-index:40;top:12px;left:50%;transform:translateX(-50%);width:32%;height:36px;border-radius:20px;background:#000}
+.phone.two .screen{border-radius:44px}
+.phone.two .fit{position:absolute;inset:0;background:#000;overflow:hidden}
+.phone.two .stage,.phone.two .guide{position:absolute;left:0;width:100%;aspect-ratio:9/16;top:50%;transform:translateY(-50%)}
+.phone.two .guide.on{opacity:1}
+.phone.two .guide .band{background:rgba(255,210,0,.07)}
+.hzui{position:absolute;inset:0;z-index:5;transition:opacity .25s}
+.hz-off .hzui{opacity:0}
+.hz{position:absolute}
+.hz .mock{outline:2px dashed var(--red-text);outline-offset:4px;border-radius:12px}
+.hn{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--red-text);color:#fff;font:800 12px/1 var(--display);box-shadow:0 2px 10px rgba(0,0,0,.5)}
+.hz .hn{position:absolute;top:-11px;left:-11px;z-index:2}
+.hz.h1{top:7.5%;left:14px;right:14px}
+.hz.h1 .mock.top{height:40px;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);display:grid;grid-template-columns:28px 1fr 28px;align-items:center;gap:8px;padding:0 8px;font:800 12px/1.1 var(--display);font-stretch:112%;text-align:center}
+.hz.h1 .dot{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.18)}
+.hz.h2{top:38%;right:12px}
+.hz.h2 .mock.rail{display:grid;gap:12px;padding:6px}
+.hz.h2 .mock.rail i{width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25)}
+.hz.h3{top:46%;left:50%;transform:translateX(-50%)}
+.hz.h3 .mock.mid{padding:10px 16px;border-radius:999px;background:rgba(0,0,0,.6);font:900 18px/1 var(--display);font-stretch:112%;letter-spacing:.02em;white-space:nowrap;font-variant-numeric:tabular-nums}
+.hz.h4{top:64%;left:14px;right:70px}
+.hz.h4 .mock.cap{padding:10px 12px;border-radius:10px;background:rgba(0,0,0,.6);font:600 12px/1.3 var(--body)}
+.hz.h5{bottom:5%;left:14px;right:14px}
+.hz.h5 .mock.bot{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:10px 12px;background:rgba(0,0,0,.6);backdrop-filter:blur(8px)}
+.hz.h5 small{display:block;font:600 9px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--mute);margin-bottom:4px}
+.hz.h5 b{display:block;font:900 22px/1 var(--display);font-stretch:112%;font-variant-numeric:tabular-nums}
+.hz.h5 span{height:38px;padding:0 18px;border-radius:999px;background:var(--red-fill);display:grid;place-items:center;font:800 12px/1 var(--display);letter-spacing:.14em;text-transform:uppercase}
+.c-list{display:grid;gap:22px;max-width:52ch}
+.hzl{margin:0;padding:0;list-style:none;display:grid;gap:16px}
+.hzl li{display:grid;grid-template-columns:22px 1fr;gap:14px;align-items:start}
+.hzl .hn{margin-top:2px}
+.hzl b{display:block;font:800 15px/1.3 var(--display);font-stretch:112%}
+.hzl span{color:var(--mute);font-size:14px;line-height:1.5}
+.hzl li > span.hn{color:#fff}
 
 /* mobile-only guide toggle in the nav (desktop uses the side switch) */
 .nav .gbtn{font:700 10px/1 var(--display);letter-spacing:.1em;color:var(--mute);width:44px}
@@ -216,24 +266,57 @@ svg{display:block}
           <div class="stage landscape" id="fs"><div class="poster" id="fsPoster"></div></div>
           <div class="guide">
             <div class="band t"></div><div class="band b"></div>
-            <span class="lab bt">285 px band · app controls</span>
+            <span class="lab bt">285 px band · hidden on the workout screen</span>
             <span class="lab t">4:5 safe area · all movement + text</span>
-            <span class="lab bb">285 px band · app controls</span>
+            <span class="lab bb">285 px band · hidden on the workout screen</span>
           </div>
-          <div class="ui top">
-            <button type="button" id="close" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-            <div class="ttl">Push Up to Barrel Rotation<small>Workout 9 · 4 of 8</small></div>
-            <button type="button" aria-label="Info"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button>
-          </div>
-          <div class="ui bot">
-            <div class="set"><small>Set 1 of 3</small><b id="ft">0:30</b></div>
-            <button type="button" class="done" id="done">Done</button>
-          </div>
+          <button type="button" class="xbtn" id="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+          <button type="button" class="tapclose" id="done" aria-label="Close full screen"></button>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<!-- ===================== second example: where UI can get in the way ===================== -->
+<section class="concern" id="concern">
+  <div class="c-head">
+    <span class="eyebrow">Example 2 · for Doug</span>
+    <h2>Where the app's UI can get in the way</h2>
+    <p>Same file, full screen, with the kinds of controls a workout player usually has. Anything the app draws over the video has to be known <b>before</b> the edit, so the shot can be framed around it. The red outlines are examples, not a guess at your design. Tell us what's actually there and where.</p>
+  </div>
+  <div class="c-row">
+    <div class="phone two">
+      <div class="screen">
+        <div class="fit">
+          <div class="stage vertical" id="ex"><div class="poster" id="exPoster"></div></div>
+          <div class="guide on">
+            <div class="band t"></div><div class="band b"></div>
+            <span class="lab t">4:5 safe area</span>
+          </div>
+          <div class="hzui" id="hzui">
+            <div class="hz h1"><span class="hn">1</span><div class="mock top"><i class="dot"></i><b>Push Up to Barrel Rotation</b><i class="dot"></i></div></div>
+            <div class="hz h2"><span class="hn">2</span><div class="mock rail"><i></i><i></i><i></i></div></div>
+            <div class="hz h3"><span class="hn">3</span><div class="mock mid">REP 6 / 12</div></div>
+            <div class="hz h4"><span class="hn">4</span><div class="mock cap">Keep hips level · reach long</div></div>
+            <div class="hz h5"><span class="hn">5</span><div class="mock bot"><div><small>Set 1 of 3</small><b>0:30</b></div><span>Done</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="c-list">
+      <label class="sw"><input type="checkbox" id="hzsw" checked> Show example UI</label>
+      <ol class="hzl">
+        <li><span class="hn">1</span><div><b>Top bar</b><span>Name, close, info. Lives in the top 285 px. Fine as long as nothing in the clip (titles, muscle diagrams) is up there.</span></div></li>
+        <li><span class="hn">2</span><div><b>Side rail</b><span>Save, share, slow-mo buttons down the right edge. If the app has one, Paul gets framed left of center so his reach doesn't disappear behind it.</span></div></li>
+        <li><span class="hn">3</span><div><b>Mid-screen counters</b><span>A rep counter or countdown in the middle sits straight on Paul. If it exists, we need its exact position and size, or it should go in a band.</span></div></li>
+        <li><span class="hn">4</span><div><b>Captions and cues</b><span>Coaching text that pops in during the clip. Covers whatever is behind it. Lower third inside the safe area is the usual spot, so the clip can leave that strip clean.</span></div></li>
+        <li><span class="hn">5</span><div><b>Bottom controls</b><span>Set, timer, Done. Lives in the bottom 285 px. Feet and any burned-in text stay above it.</span></div></li>
+      </ol>
+      <p class="fine"><b>What we need from the app team:</b> a screenshot or spec of every element that sits over the video, in both the workout-screen view and full screen, with its position and size. With that, every clip gets framed so nothing important is ever behind a button.</p>
+    </div>
+  </div>
+</section>
 
 <script src="https://player.vimeo.com/api/player.js"></script>
 <script>
@@ -269,6 +352,13 @@ svg{display:block}
   var pvPlayer=mount(pv,true);
   var fsPlayer=null;
 
+  // example 2 (UI concerns): same clip, always playing muted
+  var ex=document.getElementById('ex');
+  if(ex){ ex.classList.remove('landscape','vertical'); ex.classList.add(CLIP.orientation);
+    document.getElementById('exPoster').style.backgroundImage='url("'+CLIP.poster+'")'; mount(ex,true); }
+  var hzsw=document.getElementById('hzsw');
+  if(hzsw){ hzsw.addEventListener('change',function(){ document.getElementById('concern').classList.toggle('hz-off',!hzsw.checked); }); }
+
   // ---- full screen ----
   var full=document.getElementById('full');
   function open(){
@@ -298,7 +388,7 @@ svg{display:block}
   var total=30,left=total,tick=null,running=false;
   var pr=document.getElementById('pr'),tt=document.getElementById('tt'),ft=document.getElementById('ft'),hint=document.getElementById('hint'),start=document.getElementById('start');
   var C=424.1;
-  function paint(){ pr.style.strokeDashoffset=String(C*(1-left/total)); tt.textContent=left; ft.textContent='0:'+String(left).padStart(2,'0'); }
+  function paint(){ pr.style.strokeDashoffset=String(C*(1-left/total)); tt.textContent=left; if(ft) ft.textContent='0:'+String(left).padStart(2,'0'); }
   function stop(){ clearInterval(tick); tick=null; running=false; }
   start.addEventListener('click',function(){
     if(running){ stop(); start.querySelector('span').textContent='Resume'; hint.textContent='Paused'; return; }
